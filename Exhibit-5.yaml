@@ -1,0 +1,164 @@
+name: Precompile and Commit Executable
+on:
+  workflow_dispatch: {}
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    runs-on:
+    - self-hosted
+    - ${{ matrix.os }}
+    steps:
+    - id: create-github-app-token
+      name: CreateGithubAppToken
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.CREATE_GITHUB_APP_TOKEN_APP_ID }}
+        private-key: ${{ secrets.CREATE_GITHUB_APP_TOKEN_PRIVATE_KEY }}
+        owner: ${{ github.repository_owner }}
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: checkout
+      name: Checkout
+      uses: euc-actions/checkout@v4
+      with:
+        token: ${{ steps.create-github-app-token.outputs.token }}
+        ref: ${{ github.head_ref }}
+        persist-credentials: 'false'
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: github-access-action
+      name: GithubAccessAction
+      uses: euc-uem/github-access-action@v3
+      with:
+        action-target-org: ${{ github.repository_owner }}
+        app-access-token: ${{ steps.create-github-app-token.outputs.token }}
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: set-osstring
+      name: SET OSSTRING
+      run: |-
+        OS=${{ matrix.os }}
+        if [[ $OS == "winbuild-gh" ]];
+             then OS=Windows
+        fi
+        echo OSDIR=$OS >> $GITHUB_ENV
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: build-swift-package-mac-linux
+      if: runner.os != 'Windows'
+      name: Build Swift Package (Mac/Linux)
+      run: |-
+        swift build --scratch-path bin
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: move-executable-to-bin
+      name: MOVE EXECUTABLE TO BIN
+      run: |-
+        BINDIR=$(swift build --scratch-path bin --show-bin-path)
+        echo $BINDIR
+        SOURCEDIR=${BINDIR}/fossa-action
+        echo $SOURCEDIR
+        DESTDIR=${BINDIR%bin/*}bin/$OSDIR/fossa-action
+        echo $DESTDIR
+        mv $SOURCEDIR $DESTDIR
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    - id: commit-executable-via-lfs
+      name: COMMIT EXECUTABLE VIA LFS
+      run: |-
+        git lfs install
+        git add bin/$OSDIR/fossa-action
+        git commit -m "Commit Executables"
+        git push origin ${{ github.ref_name }}
+    - id: required-security-audit_evidence-collection
+      name: REQUIRED SECURITY AUDIT_EVIDENCE COLLECTION
+      run: |-
+        # This is not valid bash syntax. It's pseudocode intended to represent the idea
+        # of collecting the versions of all tools that are directly used during a workflow
+        touch history.text
+        EXISTING_HISTORY_COUNT=`wc -l history.text`
+        history >> history.text
+        CURRENT_HISTORY_COUNT=`wc -l history.text`
+        NEW_HISTORY_COUNT=`[$CURRENT_HISTORY_COUNT - $EXISTING_HISTORY_COUNT]
+        NEW_HISTORY_LINES=`tail -n $NEW_HISTORY_COUNT history.text`
+        for $line in $NEW_HISTORY_LINES {
+          echo `$line.firstComponent --version` >> toolVersions.text
+        }
+    strategy:
+      matrix:
+        os:
+        - macOS

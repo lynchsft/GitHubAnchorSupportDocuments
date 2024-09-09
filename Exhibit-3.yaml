@@ -1,0 +1,70 @@
+name: Precompile and Commit Executable
+on:
+  workflow_dispatch: {}
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    runs-on:
+    - self-hosted
+    - ${{ matrix.os }}
+    steps:
+    - id: create-github-app-token
+      name: CreateGithubAppToken
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.CREATE_GITHUB_APP_TOKEN_APP_ID }}
+        private-key: ${{ secrets.CREATE_GITHUB_APP_TOKEN_PRIVATE_KEY }}
+        owner: &gh_org ${{ github.repository_owner }}
+    - id: checkout
+      name: Checkout
+      uses: euc-actions/checkout@v4
+      with:
+        token: &gh_app_token ${{ steps.create-github-app-token.outputs.token }}
+        ref: ${{ github.head_ref }}
+        persist-credentials: 'false'
+    - id: github-access-action
+      name: GithubAccessAction
+      uses: euc-uem/github-access-action@v3
+      with:
+        action-target-org: *gh_org
+        app-access-token: *gh_app_token
+    - &setOSString
+      id: set-osstring
+      name: SET OSSTRING
+      run: |-
+        OS=${{ matrix.os }}
+        if [[ $OS == "winbuild-gh" ]];
+             then OS=Windows
+        fi
+        echo OSDIR=$OS >> $GITHUB_ENV
+    - &buildSwiftPackageMacLinux
+      id: build-swift-package-mac-linux
+      if: runner.os != 'Windows'
+      name: Build Swift Package (Mac/Linux)
+      run: |-
+        swift build --scratch-path bin
+    - &moveExecutableToBin
+      id: move-executable-to-bin
+      name: MOVE EXECUTABLE TO BIN
+      run: |-
+        BINDIR=$(swift build --scratch-path bin --show-bin-path)
+        echo $BINDIR
+        SOURCEDIR=${BINDIR}/fossa-action
+        echo $SOURCEDIR
+        DESTDIR=${BINDIR%bin/*}bin/$OSDIR/fossa-action
+        echo $DESTDIR
+        mv $SOURCEDIR $DESTDIR
+    - &commitExecutableViaLFS
+      id: commit-executable-via-lfs
+      name: COMMIT EXECUTABLE VIA LFS
+      run: |-
+        git lfs install
+        git add bin/$OSDIR/fossa-action
+        git commit -m "Commit Executables"
+        git push origin ${{ github.ref_name }}
+    strategy:
+      matrix:
+        os:
+        - macOS

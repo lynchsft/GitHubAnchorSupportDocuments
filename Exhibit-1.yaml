@@ -1,0 +1,66 @@
+name: Precompile and Commit Executable
+on:
+  workflow_dispatch: {}
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    runs-on:
+    - self-hosted
+    - ${{ matrix.os }}
+    steps:
+    - id: create-github-app-token
+      name: CreateGithubAppToken
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.CREATE_GITHUB_APP_TOKEN_APP_ID }}
+        private-key: ${{ secrets.CREATE_GITHUB_APP_TOKEN_PRIVATE_KEY }}
+        owner: ${{ github.repository_owner }}
+    - id: checkout
+      name: Checkout
+      uses: euc-actions/checkout@v4
+      with:
+        token: ${{ steps.create-github-app-token.outputs.token }}
+        ref: ${{ github.head_ref }}
+        persist-credentials: 'false'
+    - id: github-access-action
+      name: GithubAccessAction
+      uses: euc-uem/github-access-action@v3
+      with:
+        action-target-org: ${{ github.repository_owner }}
+        app-access-token: ${{ steps.create-github-app-token.outputs.token }}
+    - id: set_os_string
+      name: SET_OS_STRING
+      run: |-
+        OS=${{ matrix.os }}
+        if [[ $OS == "winbuild-gh" ]];
+             then OS=Windows
+        fi
+        echo OSDIR=$OS >> $GITHUB_ENV
+    - id: build-swift-package-mac-linux
+      if: runner.os != 'Windows'
+      name: Build Swift Package (Mac/Linux)
+      run: |-
+        swift build --scratch-path bin
+    - id: move_executable_to_bin
+      name: MOVE_EXECUTABLE_TO_BIN
+      run: |-
+        BINDIR=$(swift build --scratch-path bin --show-bin-path)
+        echo $BINDIR
+        SOURCEDIR=${BINDIR}/fossa-action
+        echo $SOURCEDIR
+        DESTDIR=${BINDIR%bin/*}bin/$OSDIR/fossa-action
+        echo $DESTDIR
+        mv $SOURCEDIR $DESTDIR
+    - id: commit_executable_via_lfs
+      name: COMMIT_EXECUTABLE_VIA_LFS
+      run: |-
+        git lfs install
+        git add bin/$OSDIR/fossa-action
+        git commit -m "Commit Executables"
+        git push origin ${{ github.ref_name }}
+    strategy:
+      matrix:
+        os:
+        - macOS
