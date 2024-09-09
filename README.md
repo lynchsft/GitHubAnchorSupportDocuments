@@ -16,7 +16,7 @@
         * Redundancy aliasing provides a one-line cost for step injections (after the first definition)
             * Example: a security regime injects an evidence-collecting script after every _natural_ step of a workflow. 
     * By enabling anchor support GitHub will foster a collection of open-source tools providing high-order programming semantics for Workflows.
-        * This echo system is akin to the [list of public libraries for the GitHub REST API](https://docs.github.com/en/rest/using-the-rest-api/libraries-for-the-rest-api?apiVersion=2022-11-28)
+        * This ecosystem is akin to the [list of public libraries for the GitHub REST API](https://docs.github.com/en/rest/using-the-rest-api/libraries-for-the-rest-api?apiVersion=2022-11-28)
 * Ok, so what happens if GitHub does _not_ enable anchor support?
     * Omnissa will proceed to enjoy the above advantages of anchors and maintain two forms of workflows:
         * The authoritative, minimized, anchor annotated form 
