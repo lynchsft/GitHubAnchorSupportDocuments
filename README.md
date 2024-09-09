@@ -1,4 +1,4 @@
-#GitHub YAML Anchor Support#
+# GitHub YAML Anchor Support
 
 * Current status of [#1182](https://docs.github.com/en/rest/using-the-rest-api/libraries-for-the-rest-api?apiVersion=2022-11-28). 
     * Feature Scheduled?
@@ -31,7 +31,7 @@
         * Learn what your strong partner Omnissa can do with best-in-class Workflow programming techniques. 
 
 
-##Exhibits:##
+## Exhibits:
 1. [A typical workflow (starting point)](Exhibit-1.yaml)
 2. [The workflow with Auto Aliasing enabled](Exhibit-2.yaml)
 3. [The workflow with named anchors/aliases](Exhibit-3.yaml)
@@ -39,6 +39,6 @@
 5. [A fully expanded form of the workflow with an injected (AOP) security control to report build evidence](Exhibit-5.yaml) 
 6. [A minimized form of the workflow with an injected (AOP) security control to report build evidence](Exhibit-6.yaml)
 
-##Links:##
+## Links:
 * [Public feature request for GitHub yaml parsing to support anchors](https://github.com/actions/runner/issues/1182)
 * [GitHub listing of public libraries for the REST API](https://docs.github.com/en/rest/using-the-rest-api/libraries-for-the-rest-api?apiVersion=2022-11-28)
